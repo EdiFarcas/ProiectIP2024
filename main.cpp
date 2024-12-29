@@ -16,7 +16,7 @@ int n, nrjucatori=1, jucator = 1, tabla_dimensiune = 9, latime, inaltime, up, di
 int tabla_joc[20][20];
 
 int directie_i[] = {0, 0, 1, -1}, directie_j[] = {1, -1, 0, 0};
-const char* image_path ="D:/Proiecte facultate/Anul-1/ProiectIP/Imagine_fundal_test_3.jpg";
+const char* image_path ="Imagine_fundal_test_3.jpg";
 int imaginex, imaginey, level_bot=2;
 
 struct buton{
