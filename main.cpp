@@ -16,7 +16,7 @@ int n, nrjucatori=1, jucator = 1, tabla_dimensiune = 9, latime, inaltime, up, di
 int tabla_joc[20][20];
 
 int directie_i[] = {0, 0, 1, -1}, directie_j[] = {1, -1, 0, 0};
-const char* image_path ="Imagine_fundal_test_3.jpg";
+const char* image_path = "Imagine_fundal_test_3.jpg";
 int imaginex, imaginey, level_bot=2;
 
 struct buton{
@@ -29,7 +29,7 @@ void game();
 void butonshow();
 void tabla_draw();
 void afisare_tabla();
-void line_draw();
+void line_draw(int linie, int coloana);
 void multiplayer();
 bool win(int jucator);
 void win_screen(int winner);
@@ -406,13 +406,16 @@ void multiplayer(){
         outtextxy(getmaxx()/30+textwidth("Green turn... ")/2-100, getmaxy()/4, "Green turn... ");
     }
 
-    bool gata = false, undo = 1;
+    bool gata = false;
     int linie, coloana;
 
-    buton reset, menu;
-    reset.status = menu.status = false;
+    buton reset, menu, undo;
+    reset.status = menu.status = undo.status = false;
 
     settextstyle(3, HORIZ_DIR, 5);
+    undo.mx = getmaxx()/20*18+textwidth("Undo")/2;
+    undo.my = getmaxy()/4*2;
+    strcpy(undo.text, "Undo");
     reset.mx = getmaxx()/20+textwidth("Green turn... ")/2;
     reset.my = getmaxy()/4*2;
     strcpy(reset.text, "Restart");
@@ -423,7 +426,7 @@ void multiplayer(){
     settextstyle(3, HORIZ_DIR, 5);
     butonshow(reset, 5, WHITE);
     butonshow(menu, 5, WHITE);
-    /// Daca vrei sa faci cu mai mult de 6 va trebuii sa vezi cum merge cu dimensiunile de la butoane si unde sa le pui
+    butonshow(undo, 5, WHITE);
 
     int x, y, winner=0;
     while(!gata)
@@ -508,6 +511,25 @@ void multiplayer(){
                     {
                         butonshow(menu, 4, WHITE);
                         menu.status = false;
+                    }
+                }
+                if(x>=undo.x1 && x<=undo.x2 && y>=undo.y1 && y<=undo.y2)
+                {
+                    if(undo.status == false)
+                    {
+                        settextstyle(3, HORIZ_DIR, 5);
+                        butonshow(undo, 5, WHITE);
+                        undo.status = true;
+                        cout << "BUTON UNDO APASAT" << endl;
+                    }
+                }
+                else
+                {
+                    if(undo.status == true)
+                    {
+                        settextstyle(3, HORIZ_DIR, 5);
+                        butonshow(undo, 5, WHITE);
+                        undo.status = false;
                     }
                 }
             }
@@ -713,21 +735,26 @@ void singleplayer(){
         outtextxy(getmaxx()/30+textwidth("Green turn...")/2 - 100, getmaxy()/4, "Green turn...");
     }
 
-    bool gata = false, undo = 1;
+    bool gata = false;
     int linie, coloana, ultima_linie, ultima_coloana;
 
-    buton reset, menu;
-    reset.status = menu.status = false;
+    buton reset, menu, undo;
+    reset.status = menu.status = undo.status = false;
 
     settextstyle(3, HORIZ_DIR, 5);
-    reset.mx = getmaxx()/20+textwidth("Green turn...")/2;
+    undo.mx = getmaxx()/20*18+textwidth("Undo")/2;
+    undo.my = getmaxy()/4*2;
+    strcpy(undo.text, "Undo");
+    reset.mx = getmaxx()/20+textwidth("Green turn... ")/2;
     reset.my = getmaxy()/4*2;
     strcpy(reset.text, "Restart");
-    menu.mx = getmaxx()/20+textwidth("Green turn...")/2;
+    menu.mx = getmaxx()/20+textwidth("Green turn... ")/2;
     menu.my = getmaxy()/4*3;
     strcpy(menu.text, "Menu");
 
+
     settextstyle(3, HORIZ_DIR, 5);
+    butonshow(undo, 5, WHITE);
     butonshow(reset, 5, WHITE);
     butonshow(menu, 5, WHITE);
 
@@ -835,6 +862,25 @@ void singleplayer(){
                         settextstyle(3, HORIZ_DIR, 5);
                         butonshow(menu, 5, WHITE);
                         menu.status = false;
+                    }
+                }
+                if(x>=undo.x1 && x<=undo.x2 && y>=undo.y1 && y<=undo.y2)
+                {
+                    if(undo.status == false)
+                    {
+                        settextstyle(3, HORIZ_DIR, 5);
+                        butonshow(undo, 5, WHITE);
+                        undo.status = true;
+                        cout << "BUTON UNDO APASAT" << endl;
+                    }
+                }
+                else
+                {
+                    if(undo.status == true)
+                    {
+                        settextstyle(3, HORIZ_DIR, 5);
+                        butonshow(undo, 5, WHITE);
+                        undo.status = false;
                     }
                 }
             }
