@@ -17,13 +17,17 @@ int tabla_joc[20][20];
 
 int directie_i[] = {0, 0, 1, -1}, directie_j[] = {1, -1, 0, 0};
 const char* image_path = "Imagine_fundal_test_3.jpg";
-int imaginex, imaginey, level_bot=2;
+int imaginex, imaginey, level_bot=2, contor_undo = 0;
 
 struct buton{
     int x1, x2, y1, y2, mx, my;
     char text[40];
     bool status;
 };
+
+struct poz_undo{
+    int linie, coloana;
+}poziti_undo[100];
 
 void game();
 void butonshow();
@@ -39,6 +43,7 @@ void singleplayer();
 void bot_easy(int& linie, int& coloana);
 void bot_medium(int& linie, int& coloana);
 void bot_hard(int ultima_linie, int ultima_coloana, int& linie, int& coloana);
+void undo_move();
 
 int main(){
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
@@ -140,9 +145,6 @@ void afisare_tabla(){
 void tabla_draw() {
     ///Functia care deseneaza tabla dupa ce jucatorul a apasat play;
     ///Dimensiunea tablei difera in functie de variabila tabla_dimensiune.
-    setbkcolor(FUNDAL);
-    clearviewport();
-    fundal_draw();
     int i, j;
     latime = inaltime = latura * tabla_dimensiune;
     up = (getmaxy() - latime) / 2;
@@ -202,6 +204,10 @@ void tabla_draw() {
 }
 
 void line_draw(int linie, int coloana){
+    contor_undo++;
+    poziti_undo[contor_undo].linie = linie;
+    poziti_undo[contor_undo].coloana = coloana;
+
     ///Functie care deseneaza liniile si schimba textul cu ce jucator urmeaza sa mute.
     if(jucator == 1)
     {
@@ -256,7 +262,7 @@ bool win(int juc){
     }
 
     ///Scrierea matricei bordate in consola
-    /*
+
     for(i=0; i<=tabla_dimensiune*2+2; i++)
     {
         for(j=0; j<=tabla_dimensiune*2+2; j++)
@@ -265,7 +271,6 @@ bool win(int juc){
         }
         cout << endl;
     }
-    */
 
     ///verificam in functie de fiecare jucator.
     ///In functie de ce jucator este jerificat noi avem puncte diferite de verificare. Unele pentru jucatorul albastru si altele pentru jucatorul verde;
@@ -392,6 +397,9 @@ void win_screen(int winner){
 }
 
 void multiplayer(){
+    clearviewport();
+    fundal_draw();
+    tabla_draw();
     nrmutari = 0;
     if(jucator == 1)
     {
@@ -474,11 +482,14 @@ void multiplayer(){
                 {
                     if(reset.status == false)
                     {
-                        butonshow(reset, 4, WHITE);
+                        butonshow(reset, 5, WHITE);
                         reset.status = true;
                         menu.status = true;
                         jucator=1;
                         nrmutari=0;
+                        poziti_undo[100].linie = {};
+                        poziti_undo[100].coloana = {};
+                        contor_undo = 0;
                         tabla_init();
                         tabla_draw();
                         multiplayer();
@@ -489,7 +500,7 @@ void multiplayer(){
                 {
                     if(reset.status == true)
                     {
-                        butonshow(reset, 4, WHITE);
+                        butonshow(reset, 5, WHITE);
                         reset.status = false;
                     }
                 }
@@ -497,7 +508,7 @@ void multiplayer(){
                 {
                     if(menu.status == false)
                     {
-                        butonshow(menu, 4, WHITE);
+                        butonshow(menu, 5, WHITE);
                         menu.status = true;
                         jucator=1;
                         nrmutari=0;
@@ -509,27 +520,31 @@ void multiplayer(){
                 {
                     if(menu.status == true)
                     {
-                        butonshow(menu, 4, WHITE);
+                        butonshow(menu, 5, WHITE);
                         menu.status = false;
                     }
                 }
-                if(x>=undo.x1 && x<=undo.x2 && y>=undo.y1 && y<=undo.y2)
+                if(nrmutari>1)
                 {
-                    if(undo.status == false)
+                    if(x>=undo.x1 && x<=undo.x2 && y>=undo.y1 && y<=undo.y2)
                     {
-                        settextstyle(3, HORIZ_DIR, 5);
-                        butonshow(undo, 5, WHITE);
-                        undo.status = true;
-                        cout << "BUTON UNDO APASAT" << endl;
+                        if(undo.status == false)
+                        {
+                            settextstyle(3, HORIZ_DIR, 5);
+                            butonshow(undo, 5, WHITE);
+                            undo.status = true;
+                            undo_move();
+                            cout << "BUTON UNDO APASAT" << endl;
+                        }
                     }
-                }
-                else
-                {
-                    if(undo.status == true)
+                    else
                     {
-                        settextstyle(3, HORIZ_DIR, 5);
-                        butonshow(undo, 5, WHITE);
-                        undo.status = false;
+                        if(undo.status == true)
+                        {
+                            settextstyle(3, HORIZ_DIR, 5);
+                            butonshow(undo, 5, WHITE);
+                            undo.status = false;
+                        }
                     }
                 }
             }
@@ -721,6 +736,9 @@ void setings_changes(){
 }
 
 void singleplayer(){
+    clearviewport();
+    fundal_draw();
+    tabla_draw();
     nrmutari = 0;
     if(jucator == 1)
     {
@@ -827,6 +845,9 @@ void singleplayer(){
                         menu.status = true;
                         jucator=1;
                         nrmutari=0;
+                        poziti_undo[100].linie = {};
+                        poziti_undo[100].coloana = {};
+                        contor_undo = 0;
                         tabla_init();
                         tabla_draw();
                         singleplayer();
@@ -864,23 +885,27 @@ void singleplayer(){
                         menu.status = false;
                     }
                 }
-                if(x>=undo.x1 && x<=undo.x2 && y>=undo.y1 && y<=undo.y2)
+                if(nrmutari>1)
                 {
-                    if(undo.status == false)
+                    if(x>=undo.x1 && x<=undo.x2 && y>=undo.y1 && y<=undo.y2)
                     {
-                        settextstyle(3, HORIZ_DIR, 5);
-                        butonshow(undo, 5, WHITE);
-                        undo.status = true;
-                        cout << "BUTON UNDO APASAT" << endl;
+                        if(undo.status == false)
+                        {
+                            settextstyle(3, HORIZ_DIR, 5);
+                            butonshow(undo, 5, WHITE);
+                            undo.status = true;
+                            undo_move();
+                            cout << "BUTON UNDO APASAT" << endl;
+                        }
                     }
-                }
-                else
-                {
-                    if(undo.status == true)
+                    else
                     {
-                        settextstyle(3, HORIZ_DIR, 5);
-                        butonshow(undo, 5, WHITE);
-                        undo.status = false;
+                        if(undo.status == true)
+                        {
+                            settextstyle(3, HORIZ_DIR, 5);
+                            butonshow(undo, 5, WHITE);
+                            undo.status = false;
+                        }
                     }
                 }
             }
@@ -989,7 +1014,35 @@ void bot_hard(int ultima_linie, int ultima_coloana, int& linie, int& coloana) {
     }
 }
 
+void undo_move(){
+    if(nrmutari<1)
+    {
+        return;
+    }
+    int i=0;
+    cout << poziti_undo[contor_undo].linie << ' ' << poziti_undo[contor_undo].coloana << ' ' << contor_undo << endl;
+    /*if(nrjucatori == 1)
+    {
+        tabla_joc[poziti_undo[contor_undo].linie+1][poziti_undo[contor_undo].coloana+1] = 0;
+        contor_undo--;
+        tabla_joc[poziti_undo[contor_undo].linie+1][poziti_undo[contor_undo].coloana+1] = 0;
+        contor_undo--;
+        tabla_draw();
+        for(i=1; i<=contor_undo; i++)
+        {
+            line_draw(poziti_undo[i].linie, poziti_undo[i].coloana);
+        }
+    }*/
+    cout << "Undo Mutare" << endl;
+    cout << poziti_undo[contor_undo].linie << ' ' << poziti_undo[contor_undo].coloana << ' ' << contor_undo << endl;
+    return;
+}
+
 void game(){
+    poziti_undo[100].linie = {};
+    poziti_undo[100].coloana = {};
+    contor_undo = 0;
+
     setcolor(FUNDAL);
     clearviewport();
     fundal_draw();
